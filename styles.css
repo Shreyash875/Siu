@@ -136,6 +136,23 @@ body {
   font-weight: bold;
 }
 
+/* Restart Button */
+#restartButton {
+  margin-top: 20px;
+  padding: 15px 30px;  /* Increased padding for a bigger button */
+  font-size: 1.2rem;   /* Increased font size */
+  background-color: #000; /* Dark black background color */
+  color: #fff; /* Changed text color to white for better contrast */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#restartButton:hover {
+  background-color: #333; /* Slightly lighter on hover */
+}
+
 /* Popup Overlay */
 .overlay {
   position: fixed;
@@ -176,4 +193,22 @@ button {
 
 button:hover {
   background-color: #1e5f9e;
+}
+
+/* Animation for winning cells */
+@keyframes winning-animation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cell.winner {
+  animation: winning-animation 0.5s ease-in-out forwards;
+  background-color: rgba(255, 215, 0, 0.5); /* Light gold color for winner */
 }
