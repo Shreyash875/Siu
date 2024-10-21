@@ -26,88 +26,80 @@ const winConditions = [
   [2, 4, 6],
 ];
 
-// Handle cell click
-cells.forEach((cell, index) => {
-  cell.addEventListener('click', () => handleCellClick(index));
+// Event listeners
+cells.forEach(cell => {
+  cell.addEventListener('click', handleCellClick);
 });
 
-// Handle cell click function
-function handleCellClick(index) {
-  if (board[index] !== '' || winnerPopup.style.display === 'flex') return;
+restartButton.addEventListener('click', resetGame);
+newGameButton.addEventListener('click', resetGame);
 
+// Handle cell click
+function handleCellClick(event) {
+  const index = event.target.getAttribute('data-index');
+
+  // If the cell is already taken or the game is over
+  if (board[index] || winnerMessage.innerText) return;
+
+  // Update the board and the UI
   board[index] = currentPlayer;
-  cellDisplay(index);
+  event.target.innerText = currentPlayer;
+  event.target.classList.add(currentPlayer === 'X' ? 'x' : 'o');
 
+  // Check for a winner or a draw
   if (checkWin()) {
-    updateScore(currentPlayer);
-    showWinner(currentPlayer);
-  } else if (board.every(cell => cell !== '')) {
+    setTimeout(() => {
+      displayWinner(currentPlayer);
+    }, 100);
+  } else if (board.every(cell => cell)) {
     draws++;
-    drawsDisplay.textContent = draws;
-    showWinner('Draw');
+    drawsDisplay.innerText = draws;
+    setTimeout(() => {
+      displayWinner('Draw');
+    }, 100);
   } else {
+    // Switch player
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   }
-}
-
-// Display player move in the cell
-function cellDisplay(index) {
-  cells[index].textContent = board[index];
-  cells[index].classList.add(currentPlayer === 'X' ? 'x' : 'o');
 }
 
 // Check for a win
 function checkWin() {
   return winConditions.some(condition => {
     const [a, b, c] = condition;
-    return board[a] && board[a] === board[b] && board[a] === board[c];
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      // Highlight winning cells
+      cells[a].classList.add('winner');
+      cells[b].classList.add('winner');
+      cells[c].classList.add('winner');
+      // Update score
+      if (board[a] === 'X') {
+        playerXWins++;
+        playerXWinsDisplay.innerText = playerXWins;
+      } else {
+        playerOWins++;
+        playerOWinsDisplay.innerText = playerOWins;
+      }
+      return true;
+    }
+    return false;
   });
 }
 
-// Update score
-function updateScore(winner) {
-  if (winner === 'X') {
-    playerXWins++;
-    playerXWinsDisplay.textContent = playerXWins;
-  } else if (winner === 'O') {
-    playerOWins++;
-    playerOWinsDisplay.textContent = playerOWins;
-  }
-}
-
-// Show winner popup
-function showWinner(winner) {
-  winnerMessage.textContent = winner === 'Draw' ? 'It\'s a Draw!' : `${winner} Wins!`;
+// Display winner
+function displayWinner(winner) {
+  winnerMessage.innerText = winner === 'Draw' ? 'It\'s a Draw!' : `${winner} Wins!`;
   winnerPopup.style.display = 'flex';
-
-  // Add winner class to winning cells
-  if (winner !== 'Draw') {
-    winConditions.forEach(condition => {
-      const [a, b, c] = condition;
-      if (board[a] === winner && board[b] === winner && board[c] === winner) {
-        cells[a].classList.add('winner');
-        cells[b].classList.add('winner');
-        cells[c].classList.add('winner');
-      }
-    });
-  }
 }
 
-// Restart game
-restartButton.addEventListener('click', restartGame);
-newGameButton.addEventListener('click', restartGame);
-
-function restartGame() {
+// Reset game
+function resetGame() {
   board = ['', '', '', '', '', '', '', '', ''];
-  currentPlayer = 'X';
+  currentPlayer = 'X'; // Reset current player
   cells.forEach(cell => {
-    cell.textContent = '';
+    cell.innerText = '';
     cell.classList.remove('x', 'o', 'winner');
   });
-  winnerPopup.style.display = 'none';
+  winnerPopup.style.display = 'none'; // Hide popup
+  winnerMessage.innerText = ''; // Clear winner message
 }
-
-// Optional: Add functionality to close the popup
-winnerPopup.addEventListener('click', () => {
-  winnerPopup.style.display = 'none';
-});
