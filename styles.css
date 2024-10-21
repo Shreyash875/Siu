@@ -1,113 +1,214 @@
-let board = ['', '', '', '', '', '', '', '', '']; // Game board
-let currentPlayer = 'X'; // Current player
-let playerXWins = 0; // Player X wins counter
-let playerOWins = 0; // Player O wins counter
-let draws = 0; // Draws counter
+/* General Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
 
-const boardElement = document.getElementById('board');
-const cells = document.querySelectorAll('.cell');
-const playerXWinsDisplay = document.getElementById('playerXWins');
-const playerOWinsDisplay = document.getElementById('playerOWins');
-const drawsDisplay = document.getElementById('draws');
-const restartButton = document.getElementById('restartButton');
-const winnerPopup = document.getElementById('winnerPopup');
-const winnerMessage = document.getElementById('winnerMessage');
-const newGameButton = document.getElementById('newGameButton');
+body {
+  background: linear-gradient(135deg, #1c1c1c, #3e3e3e); /* Dark gradient */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
 
-// Winning conditions
-const winConditions = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
+/* Navigation Bar */
+.navbar {
+  width: 100%;
+  background-color: #242424;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
 
-// Handle cell click
-cells.forEach((cell, index) => {
-  cell.addEventListener('click', () => handleCellClick(index));
-});
+.navbar h2 {
+  color: #fff;
+  margin-left: 20px;
+  font-size: 1.5rem;
+}
 
-// Handle cell click function
-function handleCellClick(index) {
-  if (board[index] !== '' || winnerPopup.style.display === 'flex') return;
+.navbar ul {
+  display: flex;
+  list-style: none;
+  margin-right: 20px;
+}
 
-  board[index] = currentPlayer;
-  cellDisplay(index);
+.navbar ul li {
+  margin-left: 20px;
+}
 
-  if (checkWin()) {
-    updateScore(currentPlayer);
-    showWinner(currentPlayer);
-  } else if (board.every(cell => cell !== '')) {
-    draws++;
-    drawsDisplay.textContent = draws;
-    showWinner('Draw');
-  } else {
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+.navbar ul li a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+}
+
+.navbar ul li a:hover {
+  color: #00f2fe;
+}
+
+/* Main Container */
+.main-container {
+  margin-top: 100px;
+  text-align: center;
+}
+
+/* Tic Tac Toe Logo */
+.game-logo {
+  background-color: black;
+  padding: 15px;
+  display: inline-block;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.game-title {
+  font-size: 2.5rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Game Board */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.cell {
+  width: 120px;
+  height: 120px;
+  background-color: #fff;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.cell:hover {
+  background-color: #f2f2f2;
+  transform: scale(1.05);
+}
+
+/* Scoreboard */
+.scoreboard {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.score-card {
+  background-color: #242424;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  width: 120px;
+}
+
+.score-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #00f2fe;
+}
+
+.score-card span {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Restart Button */
+#restartButton {
+  margin-top: 20px;
+  padding: 15px 30px; /* Increased padding for a bigger button */
+  font-size: 1.2rem;  /* Increased font size */
+  background-color: #000; /* Dark black background color */
+  color: #fff; /* Changed text color to white for better contrast */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#restartButton:hover {
+  background-color: #333; /* Slightly lighter black on hover */
+}
+
+/* Popup Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.popup {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  color: #333;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.popup h2 {
+  margin-bottom: 15px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #0f3460;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #1e5f9e;
+}
+
+/* Animation for winning cells */
+@keyframes winning-animation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
-// Display player move in the cell
-function cellDisplay(index) {
-  cells[index].textContent = board[index];
-  cells[index].classList.add(currentPlayer === 'X' ? 'x' : 'o');
+.cell.winner {
+  animation: winning-animation 0.5s ease-in-out forwards;
+  background-color: rgba(255, 215, 0, 0.5); /* Light gold color for winner */
 }
-
-// Check for a win
-function checkWin() {
-  return winConditions.some(condition => {
-    const [a, b, c] = condition;
-    return board[a] && board[a] === board[b] && board[a] === board[c];
-  });
-}
-
-// Update score
-function updateScore(winner) {
-  if (winner === 'X') {
-    playerXWins++;
-    playerXWinsDisplay.textContent = playerXWins;
-  } else if (winner === 'O') {
-    playerOWins++;
-    playerOWinsDisplay.textContent = playerOWins;
-  }
-}
-
-// Show winner popup
-function showWinner(winner) {
-  winnerMessage.textContent = winner === 'Draw' ? 'It\'s a Draw!' : `${winner} Wins!`;
-  winnerPopup.style.display = 'flex';
-
-  // Add winner class to winning cells
-  if (winner !== 'Draw') {
-    winConditions.forEach(condition => {
-      const [a, b, c] = condition;
-      if (board[a] === winner && board[b] === winner && board[c] === winner) {
-        cells[a].classList.add('winner');
-        cells[b].classList.add('winner');
-        cells[c].classList.add('winner');
-      }
-    });
-  }
-}
-
-// Restart game
-restartButton.addEventListener('click', restartGame);
-newGameButton.addEventListener('click', restartGame);
-
-function restartGame() {
-  board = ['', '', '', '', '', '', '', '', ''];
-  currentPlayer = 'X';
-  cells.forEach(cell => {
-    cell.textContent = '';
-    cell.classList.remove('x', 'o', 'winner');
-  });
-  winnerPopup.style.display = 'none';
-}
-
-// Optional: Add functionality to close the popup
-winnerPopup.addEventListener('click', () => {
-  winnerPopup.style.display = 'none';
-});
