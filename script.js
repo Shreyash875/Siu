@@ -1,81 +1,101 @@
-const board = document.getElementById('board');
+let board = ['', '', '', '', '', '', '', '', '']; // Game board
+let currentPlayer = 'X'; // Current player
+let playerXWins = 0; // Player X wins counter
+let playerOWins = 0; // Player O wins counter
+let draws = 0; // Draws counter
+
+const boardElement = document.getElementById('board');
 const cells = document.querySelectorAll('.cell');
+const playerXWinsDisplay = document.getElementById('playerXWins');
+const playerOWinsDisplay = document.getElementById('playerOWins');
+const drawsDisplay = document.getElementById('draws');
+const restartButton = document.getElementById('restartButton');
 const winnerPopup = document.getElementById('winnerPopup');
 const winnerMessage = document.getElementById('winnerMessage');
 const newGameButton = document.getElementById('newGameButton');
 
-const playerXWins = document.getElementById('playerXWins');
-const playerOWins = document.getElementById('playerOWins');
-const draws = document.getElementById('draws');
-
-let currentPlayer = 'X';
-let gameState = Array(9).fill(null);
-let xWins = 0, oWins = 0, drawCount = 0;
-
-const winningCombinations = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],
-  [0, 4, 8], [2, 4, 6]
+// Winning conditions
+const winConditions = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
 ];
 
-// Event listeners for each cell
-cells.forEach(cell => {
-  cell.addEventListener('click', handleCellClick);
+// Add click event to each cell
+cells.forEach((cell, index) => {
+  cell.addEventListener('click', () => handleCellClick(index));
 });
 
-// Function to handle cell click
-function handleCellClick(e) {
-  const cell = e.target;
-  const index = cell.dataset.index;
+// Handle cell click
+function handleCellClick(index) {
+  if (board[index] || winnerPopup.style.display === 'flex') {
+    return; // Cell already filled or game is over
+  }
+  
+  board[index] = currentPlayer;
+  cells[index].innerText = currentPlayer; // Show the current player's symbol
 
-  // If the cell is already filled or there's a winner, do nothing
-  if (gameState[index] || checkWinner()) return;
-
-  // Update game state
-  gameState[index] = currentPlayer;
-  cell.textContent = currentPlayer; // Show current player's symbol
-
-  // Check for a winner
-  if (checkWinner()) {
-    currentPlayer === 'X' ? xWins++ : oWins++;
-    updateScore();
-    showWinner(`Player ${currentPlayer} wins!`);
-  } else if (gameState.every(Boolean)) { // Check for draw
-    drawCount++;
-    updateScore();
-    showWinner('It\'s a draw!');
+  if (checkWin()) {
+    handleWin();
+  } else if (board.every(cell => cell)) {
+    handleDraw();
   } else {
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; // Switch players
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; // Switch player
   }
 }
 
-// Function to check for a winner
-function checkWinner() {
-  return winningCombinations.some(combination =>
-    combination.every(index => gameState[index] === currentPlayer)
-  );
+// Check for win
+function checkWin() {
+  return winConditions.some(condition => {
+    const [a, b, c] = condition;
+    const hasWon = board[a] && board[a] === board[b] && board[a] === board[c];
+    if (hasWon) {
+      // Mark winning cells
+      cells[a].classList.add('winner');
+      cells[b].classList.add('winner');
+      cells[c].classList.add('winner');
+    }
+    return hasWon;
+  });
 }
 
-// Function to update the scoreboard
-function updateScore() {
-  playerXWins.textContent = xWins;
-  playerOWins.textContent = oWins;
-  draws.textContent = drawCount;
+// Handle win
+function handleWin() {
+  winnerMessage.innerText = `${currentPlayer} Wins!`;
+  winnerPopup.style.display = 'flex'; // Show the winner popup
+
+  if (currentPlayer === 'X') {
+    playerXWins++;
+    playerXWinsDisplay.innerText = playerXWins;
+  } else {
+    playerOWins++;
+    playerOWinsDisplay.innerText = playerOWins;
+  }
 }
 
-// Function to show winner message
-function showWinner(message) {
-  winnerMessage.textContent = message;
-  winnerPopup.style.display = 'flex';
+// Handle draw
+function handleDraw() {
+  winnerMessage.innerText = "It's a Draw!";
+  winnerPopup.style.display = 'flex'; // Show the winner popup
+  draws++;
+  drawsDisplay.innerText = draws; // Update draws display
 }
 
-// Event listener for new game button
+// Restart the game
+restartButton.addEventListener('click', restartGame);
 newGameButton.addEventListener('click', restartGame);
 
-// Function to restart the game
 function restartGame() {
-  gameState.fill(null);
-  cells.forEach(cell => (cell.textContent = ''));
-  currentPlayer = 'X'; // Reset current player to X
-  winnerPopup.style.display = 'none'; // Hide winner popup
+  board.fill(''); // Reset the board
+  cells.forEach(cell => {
+    cell.innerText = ''; // Clear cell display
+    cell.classList.remove('winner'); // Remove winner class
+  });
+  currentPlayer = 'X'; // Reset current player
+  winnerPopup.style.display = 'none'; // Hide popup
 }
