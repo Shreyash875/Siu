@@ -26,76 +26,88 @@ const winConditions = [
   [2, 4, 6],
 ];
 
-// Add click event to each cell
+// Handle cell click
 cells.forEach((cell, index) => {
   cell.addEventListener('click', () => handleCellClick(index));
 });
 
-// Handle cell click
+// Handle cell click function
 function handleCellClick(index) {
-  if (board[index] || winnerPopup.style.display === 'flex') {
-    return; // Cell already filled or game is over
-  }
-  
+  if (board[index] !== '' || winnerPopup.style.display === 'flex') return;
+
   board[index] = currentPlayer;
-  cells[index].innerText = currentPlayer; // Show the current player's symbol
+  cellDisplay(index);
 
   if (checkWin()) {
-    handleWin();
-  } else if (board.every(cell => cell)) {
-    handleDraw();
+    updateScore(currentPlayer);
+    showWinner(currentPlayer);
+  } else if (board.every(cell => cell !== '')) {
+    draws++;
+    drawsDisplay.textContent = draws;
+    showWinner('Draw');
   } else {
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; // Switch player
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   }
 }
 
-// Check for win
+// Display player move in the cell
+function cellDisplay(index) {
+  cells[index].textContent = board[index];
+  cells[index].classList.add(currentPlayer === 'X' ? 'x' : 'o');
+}
+
+// Check for a win
 function checkWin() {
   return winConditions.some(condition => {
     const [a, b, c] = condition;
-    const hasWon = board[a] && board[a] === board[b] && board[a] === board[c];
-    if (hasWon) {
-      // Mark winning cells
-      cells[a].classList.add('winner');
-      cells[b].classList.add('winner');
-      cells[c].classList.add('winner');
-    }
-    return hasWon;
+    return board[a] && board[a] === board[b] && board[a] === board[c];
   });
 }
 
-// Handle win
-function handleWin() {
-  winnerMessage.innerText = `${currentPlayer} Wins!`;
-  winnerPopup.style.display = 'flex'; // Show the winner popup
-
-  if (currentPlayer === 'X') {
+// Update score
+function updateScore(winner) {
+  if (winner === 'X') {
     playerXWins++;
-    playerXWinsDisplay.innerText = playerXWins;
-  } else {
+    playerXWinsDisplay.textContent = playerXWins;
+  } else if (winner === 'O') {
     playerOWins++;
-    playerOWinsDisplay.innerText = playerOWins;
+    playerOWinsDisplay.textContent = playerOWins;
   }
 }
 
-// Handle draw
-function handleDraw() {
-  winnerMessage.innerText = "It's a Draw!";
-  winnerPopup.style.display = 'flex'; // Show the winner popup
-  draws++;
-  drawsDisplay.innerText = draws; // Update draws display
+// Show winner popup
+function showWinner(winner) {
+  winnerMessage.textContent = winner === 'Draw' ? 'It\'s a Draw!' : `${winner} Wins!`;
+  winnerPopup.style.display = 'flex';
+
+  // Add winner class to winning cells
+  if (winner !== 'Draw') {
+    winConditions.forEach(condition => {
+      const [a, b, c] = condition;
+      if (board[a] === winner && board[b] === winner && board[c] === winner) {
+        cells[a].classList.add('winner');
+        cells[b].classList.add('winner');
+        cells[c].classList.add('winner');
+      }
+    });
+  }
 }
 
-// Restart the game
+// Restart game
 restartButton.addEventListener('click', restartGame);
 newGameButton.addEventListener('click', restartGame);
 
 function restartGame() {
-  board.fill(''); // Reset the board
+  board = ['', '', '', '', '', '', '', '', ''];
+  currentPlayer = 'X';
   cells.forEach(cell => {
-    cell.innerText = ''; // Clear cell display
-    cell.classList.remove('winner'); // Remove winner class
+    cell.textContent = '';
+    cell.classList.remove('x', 'o', 'winner');
   });
-  currentPlayer = 'X'; // Reset current player
-  winnerPopup.style.display = 'none'; // Hide popup
+  winnerPopup.style.display = 'none';
 }
+
+// Optional: Add functionality to close the popup
+winnerPopup.addEventListener('click', () => {
+  winnerPopup.style.display = 'none';
+});
