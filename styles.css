@@ -139,8 +139,8 @@ body {
 /* Restart Button */
 #restartButton {
   margin-top: 20px;
-  padding: 15px 30px;  /* Increased padding for a bigger button */
-  font-size: 1.2rem;   /* Increased font size */
+  padding: 15px 30px; /* Increased padding for a bigger button */
+  font-size: 1.2rem;  /* Increased font size */
   background-color: #000; /* Dark black background color */
   color: #fff; /* Changed text color to white for better contrast */
   border: none;
@@ -150,7 +150,7 @@ body {
 }
 
 #restartButton:hover {
-  background-color: #333; /* Slightly lighter on hover */
+  background-color: #333; /* Slightly lighter black on hover */
 }
 
 /* Popup Overlay */
